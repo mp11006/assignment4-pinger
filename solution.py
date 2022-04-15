@@ -16,13 +16,13 @@ def checksum(string):
     count = 0
 
     while count < countTo:
-        thisVal = (string[count + 1]) * 256 + (string[count])
+        thisVal = ord(string[count + 1]) * 256 + ord(string[count])
         csum = csum + thisVal
         csum = csum & 0xffffffff
         count = count + 2
 
     if countTo < len(string):
-        csum = csum + (string[len(string) - 1])
+        csum = csum + ord(string[len(string) - 1])
         csum = csum & 0xffffffff
 
     csum = (csum >> 16) + (csum & 0xffff)
@@ -48,19 +48,18 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         recPacket, addr = mySocket.recvfrom(1024)
 
         # Fill in start
-        icmpHeader = recPacket[20:28]
+        header = recPacket[20:28]
 
-        rawTTL = struct.unpack("s", bytes([recPacket[8]]))[0]
         # Fetch the ICMP header from the IP packet
 
-        TTL = int(binascii.hexlify(rawTTL), 16)
+        type, code, checksum, packetID, sequence = struct.unpack("bbHHh", header)
 
-        icmpType, code, checksum, packetID, sequence = struct.unpack("bbHHh", icmpHeader)
-
-        if packetID == ID:
-                byte = struct.calcsize("d")
-                timeSent = struct.unpack("d", recPacket[28:28 + byte])[0]
-                return "Reply from %s: bytes=%d time =%f5ms TTL=%d" % (destAddr, len(recPacket), (timeReceived - timeSent)*1000, TTL)
+        if type == 0 and packetID == ID:
+            bytesInDouble = struct.calcsize("d")
+            timeSent = struct.unpack("d", recPacket[28:28 + bytesInDouble])[0]
+            delay = timeReceived - timeSent
+            ttl = ord(struct.unpack("c", recPacket[8:9])[0].decode())
+            return (delay, ttl, bytesInDouble)
         
         # Fill in end
         timeLeft = timeLeft - howLongInSelect
