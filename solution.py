@@ -16,14 +16,14 @@ def checksum(string):
     count = 0
 
     while count < countTo:
-        thisVal = (string[count + 1]) * 256 + (string[count])
-        csum += thisVal
-        csum &= 0xffffffff
-        count += 2
+        thisVal = ord(string[count + 1]) * 256 + ord(string[count])
+        csum = csum + thisVal
+        csum = csum & 0xffffffff
+        count = countto + 2
 
     if countTo < len(string):
-        csum += (string[len(string) - 1])
-        csum &= 0xffffffff
+        csum = csum + ord(string[len(string) - 1])
+        csum = csum & 0xffffffff
 
     csum = (csum >> 16) + (csum & 0xffff)
     csum = csum + (csum >> 16)
