@@ -19,7 +19,7 @@ def checksum(string):
         thisVal = (string[count + 1]) * 256 + (string[count])
         csum = csum + thisVal
         csum = csum & 0xffffffff
-        count = countTo + 2
+        count = count + 2
 
     if countTo < len(string):
         csum = csum + (string[len(string) - 1])
